@@ -118,4 +118,5 @@ public:
 class Game {
 public:
 	virtual void FFBLoop(EffectConstants *constants, Helpers *helpers, EffectTriggers *triggers);
+	virtual void FFBLoop(EffectConstants* constants, Helpers* helpers, EffectTriggers* triggers, bool& keepRunning);
 };
