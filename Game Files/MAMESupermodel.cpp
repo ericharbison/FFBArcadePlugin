@@ -1767,10 +1767,11 @@ void CallTheOutputs()
 HWND hWnd;
 HWND hEdit;
 WNDCLASSEX wcex;
-Helpers* helpersGlobal;		   
+  
 static int(__stdcall* ExitOri)(UINT uExitCode);
 static int __stdcall ExitHook(UINT uExitCode)
 {
+										  
 	return 0;
 }
 
@@ -1789,13 +1790,17 @@ void add_map_entry(id_map_entry* entry, int id, char* name);
 
 id_map_entry* idmaplist;
 
+		   
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 void AppendTextToEditCtrl(HWND hWnd, LPCTSTR pszText);
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	CallTheOutputs();
+		   
 	MSG msg;
+				 
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -1935,8 +1940,6 @@ int __stdcall mame_stop(void)
 	DestroyWindow(hEdit);
 	UnregisterClassW(wcex.lpszClassName, wcex.hInstance);
 	CloseHandle(wcex.hInstance);
-
-	helpersGlobal->log("Exit Program - mame_stop");
 
 	AppendTextToEditCtrl(hEdit, TEXT("mame_stop\r\n"));
 	return 1;
