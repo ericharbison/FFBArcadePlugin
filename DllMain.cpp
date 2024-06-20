@@ -2659,7 +2659,14 @@ DWORD WINAPI FFBLoop(LPVOID lpParam)
 	{
 		if (game != 0)
 		{
-			game->FFBLoop(&effectConst, &hlp, &t);
+			if (configGameId == MAME_ || configGameId == SUPERMODEL_ || configGameId == FLYCAST)
+			{
+				game->FFBLoop(&effectConst, &hlp, &t, keepRunning);
+			}
+			else
+			{
+				game->FFBLoop(&effectConst, &hlp, &t);
+			}
 			Sleep(16);
 		}
 	}
@@ -2674,6 +2681,62 @@ void CreateFFBLoopThread()
 	hlp.log("After CreateThread");
 }
 
+void DllProcessDetach(std::string processName)
+{
+	keepRunning = false;
+
+	if (configGameId == 60)
+		WritePrivateProfileStringA("Settings", "ProcessID", 0, ".\\FFBPlugin.ini");
+
+	if (haptic)
+	{
+		SDL_HapticStopAll(haptic);
+		SDL_HapticClose(haptic);
+	}
+
+	if (haptic2)
+	{
+		SDL_HapticStopAll(haptic2);
+		SDL_HapticClose(haptic2);
+	}
+
+	if (haptic3)
+	{
+		SDL_HapticStopAll(haptic3);
+		SDL_HapticClose(haptic3);
+	}
+
+	if (GameController)
+	{
+		if (EnableRumble)
+			SDL_JoystickRumble(GameController, 0, 0, 0);
+
+		if (EnableRumbleTriggers)
+			SDL_JoystickRumbleTriggers(GameController, 0, 0, 0);
+
+		SDL_JoystickClose(GameController);
+	}
+
+	if (GameController2)
+	{
+		if (EnableRumbleDevice2)
+			SDL_JoystickRumble(GameController2, 0, 0, 0);
+
+		SDL_JoystickClose(GameController2);
+	}
+
+	if (GameController3)
+	{
+		if (EnableRumbleDevice3)
+			SDL_JoystickRumble(GameController3, 0, 0, 0);
+
+		SDL_JoystickClose(GameController3);
+	}
+
+	return;
+}
+
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ulReasonForCall, LPVOID lpReserved)
 {
 	BOOL result = TRUE;
@@ -2687,6 +2750,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ulReasonForCall, LPVOID lpReserved)
 	hlp.log("default centering & friction values:");
 	hlp.logInt(configDefaultCentering);
 	hlp.logInt(configDefaultFriction);
+
+	if (keepRunning == false)
+	{
+		DllProcessDetach(processName);
+		hlp.log("Process Slow to Exit - Terminating");
+		TerminateProcess(GetCurrentProcess(), 0);
+	}
 
 	switch (ulReasonForCall)
 	{
@@ -3503,57 +3573,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ulReasonForCall, LPVOID lpReserved)
 	case DLL_PROCESS_DETACH:
 		hlp.log("detaching from process:");
 		hlp.log((char*)processName.c_str());
-		keepRunning = false;
-
-		if (configGameId == 60)
-			WritePrivateProfileStringA("Settings", "ProcessID", 0, ".\\FFBPlugin.ini");
-
-		if (haptic)
-		{
-			SDL_HapticStopAll(haptic);
-			SDL_HapticClose(haptic);
-		}
-
-		if (haptic2)
-		{
-			SDL_HapticStopAll(haptic2);
-			SDL_HapticClose(haptic2);
-		}
-
-		if (haptic3)
-		{
-			SDL_HapticStopAll(haptic3);
-			SDL_HapticClose(haptic3);
-		}
-
-		if (GameController)
-		{
-			if (EnableRumble)
-				SDL_JoystickRumble(GameController, 0, 0, 0);
-
-			if (EnableRumbleTriggers)
-				SDL_JoystickRumbleTriggers(GameController, 0, 0, 0);
-
-			SDL_JoystickClose(GameController);
-		}
-
-		if (GameController2)
-		{
-			if (EnableRumbleDevice2)
-				SDL_JoystickRumble(GameController2, 0, 0, 0);
-
-			SDL_JoystickClose(GameController2);
-		}
-
-		if (GameController3)
-		{
-			if (EnableRumbleDevice3)
-				SDL_JoystickRumble(GameController3, 0, 0, 0);
-
-			SDL_JoystickClose(GameController3);
-		}
-
-		break;
+		DllProcessDetach(processName);
 	}
 
 	return result;
