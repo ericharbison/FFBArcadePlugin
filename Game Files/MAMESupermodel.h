@@ -16,5 +16,5 @@ along with FFB Arcade Plugin.If not, see < https://www.gnu.org/licenses/>.
 class MAMESupermodel : public Game {
 
 public:
-	void FFBLoop(EffectConstants* constants, Helpers* helpers, EffectTriggers* triggers);
+	void FFBLoop(EffectConstants* constants, Helpers* helpers, EffectTriggers* triggers, bool& keepRunning);
 };
