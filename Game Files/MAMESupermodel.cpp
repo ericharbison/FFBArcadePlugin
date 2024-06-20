@@ -2407,12 +2407,13 @@ DWORD WINAPI ThreadForDaytonaStartEffect(LPVOID lpParam)
 	return 0;
 }
 
-void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, EffectTriggers* triggers) {
+void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, EffectTriggers* triggers, bool& keepRunning) {
 
 	myconstants = constants;
 	myhelpers = helpers;
 	mytriggers = triggers;
-    keepRunning = keepRunningFlag;
+    	
+	keepRunning = keepRunningFlag;
 	if (keepRunningFlag == false && StopConstant != 255)
 	{
 		return;
