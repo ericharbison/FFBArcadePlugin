@@ -152,3 +152,8 @@ void Game::FFBLoop(EffectConstants * constants, Helpers * helpers, EffectTrigger
 {
 	return;
 }
+
+void Game::FFBLoop(EffectConstants* constants, Helpers* helpers, EffectTriggers* triggers, bool& keepRunning)
+{
+	return;
+}
