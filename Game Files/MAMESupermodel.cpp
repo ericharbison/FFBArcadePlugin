@@ -1126,6 +1126,7 @@ int SineEffectState;
 double Divide;
 static INT_PTR FFBAddress;
 static UINT8 ff;
+bool keepRunningFlag = true;
 
 std::string wheelA("wheel");
 
@@ -1763,10 +1764,13 @@ void CallTheOutputs()
 #endif
 	}
 }
+HWND hWnd;
+HWND hEdit;
+WNDCLASSEX wcex;
+Helpers* helpersGlobal;		   
 static int(__stdcall* ExitOri)(UINT uExitCode);
 static int __stdcall ExitHook(UINT uExitCode)
 {
-	TerminateProcess(GetCurrentProcess(), 0);
 	return 0;
 }
 
@@ -1785,17 +1789,13 @@ void add_map_entry(id_map_entry* entry, int id, char* name);
 
 id_map_entry* idmaplist;
 
-HWND hEdit;
-
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 void AppendTextToEditCtrl(HWND hWnd, LPCTSTR pszText);
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	CallTheOutputs();
-	HWND hWnd;
 	MSG msg;
-	WNDCLASSEX wcex;
 
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
@@ -1925,12 +1925,20 @@ int __stdcall mame_start(int hWnd)
 
 int __stdcall mame_stop(void)
 {
-	reset_id_to_outname_cache();
+	keepRunningFlag = false;
 
-	AppendTextToEditCtrl(hEdit, TEXT("mame_stop\r\n"));
+	reset_id_to_outname_cache();
 
 	StopConstant = 255;
 
+	DestroyWindow(hWnd);
+	DestroyWindow(hEdit);
+	UnregisterClassW(wcex.lpszClassName, wcex.hInstance);
+	CloseHandle(wcex.hInstance);
+
+	helpersGlobal->log("Exit Program - mame_stop");
+
+	AppendTextToEditCtrl(hEdit, TEXT("mame_stop\r\n"));
 	return 1;
 }
 
@@ -2401,6 +2409,11 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 	myconstants = constants;
 	myhelpers = helpers;
 	mytriggers = triggers;
+    keepRunning = keepRunningFlag;
+	if (keepRunningFlag == false && StopConstant != 255)
+	{
+		return;
+	}
 
 	if (!init)
 	{
